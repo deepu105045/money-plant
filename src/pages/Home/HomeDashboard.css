@@ -1,0 +1,17 @@
+/* Ensure the footer buttons are displayed inline on all screens with space around each other */
+.footer-buttons {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 10px;
+}
+
+.icon-label-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.icon-button {
+    flex: 1;
+}
