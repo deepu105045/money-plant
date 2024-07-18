@@ -1,8 +1,9 @@
 {
-  "name": "MyApp",
+  "name": "Money-plant",
   "private": true,
   "version": "0.0.1",
   "type": "module",
+  "homepage": "./",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
