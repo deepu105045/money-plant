@@ -43,6 +43,7 @@ import { store, persistor } from './state/store';
 import Registration from './pages/Register/Registeration';
 import { PersistGate } from 'redux-persist/integration/react';
 import HomeDashboard from './pages/Home/Home-dashboard';
+import Tasks from './pages/tasks/Task-dashboard';
 
 
 setupIonicReact();
@@ -59,8 +60,9 @@ const App: React.FC = () => (
 
             <Route path='/dashboard' component={Dashboard}></Route>
             <Route path="/register" component={Registration}></Route>
-
+            
             <Route path="/home/:id" component={HomeDashboard} />
+            <Route path= "/task" component={Tasks}/>
 
           </IonRouterOutlet>
         </IonReactRouter>

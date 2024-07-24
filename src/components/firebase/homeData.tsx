@@ -43,3 +43,10 @@ export const fetchMembersByHome = async (familyId: string) => {
         throw error; 
     }
 };
+
+export const findFamilyMembersByEmail = async (userEmail) => {
+    const q = query(collection(db, 'family'), where('members', 'array-contains', userEmail));
+    const querySnapshot = await getDocs(q);
+    const familyMembers = querySnapshot.docs.map(doc => doc.data().members).flat();
+    return familyMembers;
+  };
