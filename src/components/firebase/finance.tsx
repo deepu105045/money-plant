@@ -9,11 +9,12 @@
             const transactions: any[] = [];
             querySnapshot.forEach((doc: DocumentSnapshot) => {
                 const data = doc.data();
-                if (data.date && data.date.seconds) {
+                if (data && data.date && data.date.seconds) {
                     data.date = new Date(data.date.seconds * 1000 + data.date.nanoseconds / 1000000);
                 }
-                transactions.push(data);
-
+                if (data) {
+                    transactions.push(data);
+                }
             });
             return transactions;
         } catch (error: any) {
@@ -21,7 +22,6 @@
             throw new Error('Error getting transactions');
         }
     };
-
 
     export const addTransactions = async (familyId: string, year: number, month: number, data: any): Promise<void> => {
         try {
@@ -45,21 +45,24 @@
     export const calculateSumsByType = (familyId: string, year: number, month: number, callback: (sumsByType: Record<string, number>) => void) => {
         const transactionsRef = collection(db, 'cashflow', familyId, `${year}`, `${month}`, 'transactions');
         const q = query(transactionsRef);
-
+    
         return onSnapshot(q, (querySnapshot) => {
-            const sumsByType = querySnapshot.docs.reduce((acc, doc) => {
+            const sumsByType: Record<string, number> = querySnapshot.docs.reduce((acc: Record<string, number>, doc) => {
                 const data = doc.data();
                 const type = data.type;
                 const amount = data.amount;
-
-                if (!acc[type]) {
-                    acc[type] = 0;
+    
+                if (typeof type === 'string' && typeof amount === 'number') {
+                    if (!acc[type]) {
+                        acc[type] = 0;
+                    }
+    
+                    acc[type] += amount;
                 }
-
-                acc[type] += amount;
+    
                 return acc;
             }, {});
-
+    
             callback(sumsByType);
         }, (error: FirestoreError) => {
             console.error("Error calculating sums by type:", error);

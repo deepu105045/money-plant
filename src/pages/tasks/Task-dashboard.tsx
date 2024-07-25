@@ -10,16 +10,7 @@ import { addTask, updateTask, deleteTask, findTasksByEmail } from '../../compone
 import { useSelector } from 'react-redux';
 import { selectUserInfo } from '../../state/userSlice';
 import { findFamilyMembersByEmail } from '../../components/firebase/homeData';
-
-interface Task {
-    taskName: string;
-    dueDate: string;
-    isCompleted: boolean;
-    assignedTo: string[];
-    taskId?: string;
-    createdBy?: string;
-    status?: string;
-}
+import { Task } from '../../components/interfaces/TaskInterface';
 
 const TaskDashboard: React.FC = () => {
     const [tasks, setTasks] = useState<Task[]>([]);
@@ -29,16 +20,23 @@ const TaskDashboard: React.FC = () => {
     const [toastMessage, setToastMessage] = useState<string>('');
     const history = useHistory();
     const userInfo = useSelector(selectUserInfo);
-    const currentUser = userInfo.email;
+    const [currentUser, setCurrentUser] = useState<string | null>(null);
     const [members, setMembers] = useState<string[]>([]);
     const [reloadTasks, setReloadTasks] = useState(false);
 
+    useEffect(() => {
+        if (userInfo) {
+            setCurrentUser(userInfo.email);
+        }
+    }, [userInfo]);
 
     useEffect(() => {
         const fetchTasksAndMembers = async () => {
+            if (!currentUser) return;
+
             try {
                 const userTasks = await findTasksByEmail(currentUser);
-                setTasks(userTasks);                
+                setTasks(userTasks);
                 const mem = await findFamilyMembersByEmail(currentUser);
                 setMembers(mem);
             } catch (error) {
@@ -49,9 +47,11 @@ const TaskDashboard: React.FC = () => {
         };
 
         fetchTasksAndMembers();
-    }, [currentUser,reloadTasks]);
+    }, [currentUser, reloadTasks]);
 
     const handleSaveTask = (taskName: string, dueDate: string, assignedTo: string[]) => {
+        if (!currentUser) return;
+
         const newTask = {
             taskName,
             dueDate,
@@ -62,7 +62,7 @@ const TaskDashboard: React.FC = () => {
         };
 
         addTask(newTask);
-        setReloadTasks(prev => !prev); 
+        setReloadTasks(prev => !prev);
         setShowForm(false);
     };
 
@@ -71,22 +71,20 @@ const TaskDashboard: React.FC = () => {
     };
 
     const handleCompleteTask = async (task: Task) => {
-        task.status = "Done";
+        task.status = 'Done';
         await updateTask(task);
-        setReloadTasks(prev => !prev); 
-
-        // setTasks(tasks.filter(t => t.taskId !== task.taskId));
-        // setCompletedTasks([...completedTasks, task]);
+        setReloadTasks(prev => !prev);
     };
 
     const handleDeleteTask = async (task: Task) => {
         try {
-            await deleteTask(task.taskId);
-            setTasks(tasks.filter(t => t.taskId !== task.taskId));
-            setCompletedTasks(completedTasks.filter(t => t.taskId !== task.taskId));
-            setToastMessage(`Task "${task.taskName}" deleted successfully.`);
-            setReloadTasks(prev => !prev); 
-
+            if (task.taskId) {
+                await deleteTask(task.taskId);
+                setTasks(tasks.filter(t => t.taskId !== task.taskId));
+                setCompletedTasks(completedTasks.filter(t => t.taskId !== task.taskId));
+                setToastMessage(`Task "${task.taskName}" deleted successfully.`);
+                setReloadTasks(prev => !prev);
+            }
         } catch (error) {
             setToastMessage(`Error deleting task "${task.taskName}".`);
         }
@@ -106,11 +104,11 @@ const TaskDashboard: React.FC = () => {
                 </Toolbar>
             </AppBar>
             <IonContent>
-                <TaskList 
-                    tasks={tasks}  
-                    currentUser={currentUser} 
-                    updateStatus={handleCompleteTask}  
-                    loading={loading} 
+                <TaskList
+                    tasks={tasks}
+                    currentUser={currentUser || ''}
+                    updateStatus={handleCompleteTask}
+                    loading={loading}
                     deleteTask={handleDeleteTask}
                 />
 
@@ -119,7 +117,7 @@ const TaskDashboard: React.FC = () => {
                         <IonIcon icon={add} />
                     </IonFabButton>
                 </IonFab>
-                {showForm && <TaskForm users={members} currentUser={currentUser} onSave={handleSaveTask} />}
+                {showForm && <TaskForm users={members} currentUser={currentUser || ''} onSave={handleSaveTask} />}
 
                 <IonToast
                     isOpen={!!toastMessage}
