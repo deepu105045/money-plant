@@ -5,10 +5,9 @@ import {
     Chip
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { getCategoriesByFamilyId , addCategoryToConfig, getPopularCategories } from '../../components/firebase/configService'
+import { getCategoriesByFamilyId, addCategoryToConfig, getPopularCategories } from '../../components/firebase/configService';
 import { IonList, IonItem, IonLabel } from '@ionic/react';
-import { INCOME } from '../../components/utils/Constants';
-import { Label } from '@mui/icons-material';
+import { INCOME , SPENDING , INVESTMENT } from '../../components/utils/Constants';
 
 interface FinanceFormProps {
     type: string;
@@ -26,12 +25,9 @@ const TransactionForm: React.FC<FinanceFormProps> = ({ type, onCancel, onConfirm
     const [category, setCategory] = useState('');
     const [savedCategories, setSavedCategories] = useState<string[]>([]);
     const [categorySelected, setCategorySelected] = useState(false);
-    const familyId = "cashflow"
-    const [incomeCategories, setIncomeCategories] = useState<string[]>([]);
-    const [spendingCategories, setSpendingCategories] = useState<string[]>([]);
-    const [investmentCategories, setInvestmentCategories] = useState<string[]>([]);
+    const familyId = "cashflow";
+    const [popularCategories, setPopularCategories] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
-
 
     useEffect(() => {
         const today = new Date().toISOString().split('T')[0]; // Get current date in YYYY-MM-DD format
@@ -39,57 +35,54 @@ const TransactionForm: React.FC<FinanceFormProps> = ({ type, onCancel, onConfirm
 
         const fetchCategories = async () => {
             setLoading(true);
-    
-            if(type === INCOME){
+
+            if (type === INCOME) {
                 const income = await getPopularCategories('popular-income');
-                setIncomeCategories(income);
-
+                setPopularCategories(income);
+            }else if(type === SPENDING){
+                const spending = await getPopularCategories('popular-spending');
+                setPopularCategories(spending)
+            }else if(type === INVESTMENT){
+                const investment = await getPopularCategories('popular-spending');
+                setPopularCategories(investment)
             }
-            // const spending = await getPopularCategories('popular-spending');
-            // const investment = await getPopularCategories('popular-investment');
 
-            // setSpendingCategories(spending);
-            // setInvestmentCategories(investment);
             setLoading(false);
         };
 
         fetchCategories();
-
-    }, []);
+    }, [type]);
 
     const handleSubmit = async () => {
         const formData = {
             date: new Date(date),
-            amount: parseInt(amount), 
+            amount: parseInt(amount),
             category,
             notes,
             paidBy,
             type
         };
         onConfirm(formData);
-        if(savedCategories.length == 0){
-            console.log("add new category" + category)
-            await addCategoryToConfig(familyId,category)
+        if (savedCategories.length === 0) {
+            console.log("Add new category: " + category);
+            await addCategoryToConfig(familyId, category);
         }
     };
-
 
     const handleCategoryFetching = async (searchTerm: string) => {
         const unsubscribe = getCategoriesByFamilyId(familyId, searchTerm, (fetchedCategories) => {
             setSavedCategories(fetchedCategories);
-            setCategory(searchTerm)
-            setCategorySelected(true)
+            setCategory(searchTerm);
+            setCategorySelected(true);
         });
     };
 
     const handleCategory = async (selectedCategory: string) => {
-        setCategory(selectedCategory)
-        setCategorySelected(false)
+        setCategory(selectedCategory);
+        setCategorySelected(false);
     }
 
-
     if (loading) return <div>Loading...</div>;
-
 
     return (
         <Container disableGutters maxWidth="sm">
@@ -123,16 +116,15 @@ const TransactionForm: React.FC<FinanceFormProps> = ({ type, onCancel, onConfirm
                             value={category}
                             onChange={(event) => handleCategoryFetching(event.target.value)}
                         />
-                        {
-                            categorySelected && <IonList>
+                        {categorySelected && (
+                            <IonList>
                                 {savedCategories.map((cat) => (
                                     <IonItem key={cat} button onClick={() => handleCategory(cat)}>
                                         <IonLabel>{cat}</IonLabel>
                                     </IonItem>
                                 ))}
                             </IonList>
-                        }
-
+                        )}
                     </Grid>
                     <Grid item xs={12}>
                         <TextField
@@ -140,7 +132,7 @@ const TransactionForm: React.FC<FinanceFormProps> = ({ type, onCancel, onConfirm
                             label="Amount"
                             type="number"
                             value={amount}
-                            onChange={(e) => setAmount(e.target.value)} // Keep as string
+                            onChange={(e) => setAmount(e.target.value)}
                         />
                     </Grid>
                     <Grid item xs={12}>
@@ -166,7 +158,7 @@ const TransactionForm: React.FC<FinanceFormProps> = ({ type, onCancel, onConfirm
                             </RadioGroup>
                         </FormControl>
                     </Grid>
-                    <Grid item xs={12} sx={{ mt: 2 }}> {/* Add margin-top */}
+                    <Grid item xs={12} sx={{ mt: 2 }}>
                         <Button
                             fullWidth
                             variant="contained"
@@ -176,21 +168,14 @@ const TransactionForm: React.FC<FinanceFormProps> = ({ type, onCancel, onConfirm
                             Save
                         </Button>
                     </Grid>
-                </Grid>
-
-                <Grid container spacing={2}>
-                    <Grid>
-                        <Label>POPULAR CATEGORIES : </Label>
-                    </Grid>
-                    <Grid item xs={12} sx={{ mt: 2 }}>
-
-                        {incomeCategories.map((category, index) => (
-                            <Chip key={index} label={category} variant="outlined" />
+                    <Grid item xs={12}>
+                        <Typography variant="h6" component="div" sx={{ mt: 2 }}>
+                            Popular Categories
+                        </Typography>
+                        {popularCategories.map((category, index) => (
+                            <Chip key={index} label={category} onClick={()=>setCategory(category)}  variant="outlined" />
                         ))}
-
-
                     </Grid>
-
                 </Grid>
             </Box>
         </Container>
