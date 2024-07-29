@@ -43,7 +43,7 @@ const TransactionForm: React.FC<FinanceFormProps> = ({ type, onCancel, onConfirm
                 const spending = await getPopularCategories('popular-spending');
                 setPopularCategories(spending)
             }else if(type === INVESTMENT){
-                const investment = await getPopularCategories('popular-spending');
+                const investment = await getPopularCategories('popular-investment');
                 setPopularCategories(investment)
             }
 
