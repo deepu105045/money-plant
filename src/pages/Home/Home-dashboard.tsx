@@ -4,7 +4,7 @@ import {
     IonTitle, IonToolbar, IonModal, IonButton, IonFooter, IonGrid, IonRow, IonCol
 } from '@ionic/react';
 import { walletOutline, cardOutline, cashOutline, listOutline } from 'ionicons/icons';
-import { useParams, useHistory } from 'react-router-dom';
+import { useParams, useHistory, Link } from 'react-router-dom';
 import { AppBar, Toolbar, IconButton, Typography, Box } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CloseIcon from '@mui/icons-material/Close';
@@ -61,6 +61,10 @@ const HomeDashboard: React.FC = () => {
         setTriggerFetch(prev => !prev); // Toggle the triggerFetch state
     };
 
+    const navigateTo = (path: string) => {
+        history.push(path);
+      };
+
     return (
         <IonPage>
             <AppBar position="static">
@@ -72,11 +76,14 @@ const HomeDashboard: React.FC = () => {
                         Finance
                     </Typography>
                     <Box sx={{ flexGrow: 1 }} />
+                    {/* <Typography variant="h6" component="div" onClick={() => navigateTo(`/home/${id}/trend`)}>
+                        Go to Trends
+                    </Typography> */}
                 </Toolbar>
             </AppBar>
 
             <IonContent>
-                       <Box p={2}>
+                <Box p={2}>
                     <MonthYearLabel year={year} month={month} setYear={setYear} setMonth={setMonth} />
                     <Summary id={id} year={year} month={month} triggerFetch={triggerFetch} />
                 </Box>

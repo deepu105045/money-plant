@@ -84,13 +84,13 @@ const TaskCard: React.FC<{ onClick: () => void }> = ({ onClick }) => (
 );
 
 
-const MyDayCard: React.FC<{ onClick: () => void }> = ({ onClick }) => (
+const MyAssetsCard: React.FC<{ onClick: () => void }> = ({ onClick }) => (
   <IonGrid>
     <IonCol size="6" sizeSm="6" sizeMd="4">
       <IonCard button onClick={onClick} style={cardStyles}>
         <IonImg src={day} alt="Day Manager" style={mediaStyles} />
         <IonCardHeader>
-          <IonCardTitle>My Day</IonCardTitle>
+          <IonCardTitle>Our Assets</IonCardTitle>
         </IonCardHeader>
       </IonCard>
     </IonCol>
@@ -162,8 +162,7 @@ const Dashboard: React.FC = () => {
               <TaskCard onClick={() => navigateTo('/task')} />
             </IonCol>
             <IonCol>
-              <MyDayCard onClick={() => navigateTo('/day')} />
-
+              <MyAssetsCard onClick={() => navigateTo('/my-assets')} />
             </IonCol>
           </IonRow>
         </IonGrid>

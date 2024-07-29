@@ -113,3 +113,40 @@
     };
 
 
+   export const getAllMonthlyDataByType = async (familyId: string) => {
+        try {
+            const currentYear = new Date().getFullYear();
+            const startYear = 2024;
+            const typeData: { [key: string]: { [key: number]: number } } = {}; 
+    
+            for (let year = startYear; year <= currentYear; year++) {
+                for (let month = 1; month <= 12; month++) {
+                    const transactionsRef = collection(db, `cashflow/${familyId}/${year}/${month}/transactions`);
+                    const q = query(transactionsRef);
+                    const querySnapshot = await getDocs(q);
+    
+                    querySnapshot.forEach((doc) => {
+                        const data = doc.data() as Transaction;
+                        const { amount, type } = data;
+    
+                        if (!typeData[type]) {
+                            typeData[type] = {};
+                        }
+    
+                        if (!typeData[type][month]) {
+                            typeData[type][month] = 0;
+                        }
+    
+                        typeData[type][month] += amount;
+                    });
+                }
+            }
+    
+            return typeData;
+    
+        } catch (error) {
+            console.error("Error fetching transactions: ", error);
+            throw error;
+        }
+    };
+    

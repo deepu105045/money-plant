@@ -1,19 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState , useEffect } from 'react';
 import { IonContent, IonPage, IonGrid, IonRow, IonCol } from '@ionic/react';
 import { Typography, TextField, Button, Divider, Link, Box } from '@mui/material';
 import GoogleButton from '../../assets/google.png';
 import Header from '../../components/header/Header';
 import { useHistory } from 'react-router-dom';
 import { signInWithGoogle, signInWithEmailPassword } from '../../components/firebase/auth';
-import { useDispatch } from 'react-redux';
+import { useDispatch,useSelector } from 'react-redux';
 import { setUserInfo } from '../../state/userSlice';
+import { selectUserInfo } from '../../state/userSlice';
+
 
 const Login: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null); // State for error message
+  const userInfo = useSelector(selectUserInfo);
+
   const history = useHistory(); // Use useHistory hook
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    // Check if the user is already logged in
+    if (userInfo && userInfo.email) {
+      // Redirect to the home page
+      history.push('/dashboard');
+    }
+  }, [userInfo, history]);
 
   const handleLogin = async (provider: 'google' | 'email' = 'email') => {
     setError(null); // Reset error message

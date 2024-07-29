@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import {
     AppBar, Toolbar, Typography, Box, IconButton, Button, TextField,
-    Container, Grid, Radio, RadioGroup, FormControl, FormControlLabel, FormLabel
+    Container, Grid, Radio, RadioGroup, FormControl, FormControlLabel, FormLabel,
+    Chip
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import { getCategoriesByFamilyId , addCategoryToConfig, getPopularCategories } from '../../components/firebase/configService'
+import { IonList, IonItem, IonLabel } from '@ionic/react';
+import { INCOME } from '../../components/utils/Constants';
+import { Label } from '@mui/icons-material';
 
 interface FinanceFormProps {
     type: string;
@@ -15,27 +20,76 @@ interface FinanceFormProps {
 
 const TransactionForm: React.FC<FinanceFormProps> = ({ type, onCancel, onConfirm, paidByOptions, currentUser }) => {
     const [date, setDate] = useState('');
-    const [amount, setAmount] = useState(''); // Change to string
-    const [category, setCategory] = useState('');
+    const [amount, setAmount] = useState('');
     const [notes, setNotes] = useState('');
     const [paidBy, setPaidBy] = useState(currentUser);
+    const [category, setCategory] = useState('');
+    const [savedCategories, setSavedCategories] = useState<string[]>([]);
+    const [categorySelected, setCategorySelected] = useState(false);
+    const familyId = "cashflow"
+    const [incomeCategories, setIncomeCategories] = useState<string[]>([]);
+    const [spendingCategories, setSpendingCategories] = useState<string[]>([]);
+    const [investmentCategories, setInvestmentCategories] = useState<string[]>([]);
+    const [loading, setLoading] = useState(true);
+
 
     useEffect(() => {
         const today = new Date().toISOString().split('T')[0]; // Get current date in YYYY-MM-DD format
         setDate(today);
+
+        const fetchCategories = async () => {
+            setLoading(true);
+    
+            if(type === INCOME){
+                const income = await getPopularCategories('popular-income');
+                setIncomeCategories(income);
+
+            }
+            // const spending = await getPopularCategories('popular-spending');
+            // const investment = await getPopularCategories('popular-investment');
+
+            // setSpendingCategories(spending);
+            // setInvestmentCategories(investment);
+            setLoading(false);
+        };
+
+        fetchCategories();
+
     }, []);
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         const formData = {
             date: new Date(date),
-            amount: parseInt(amount), // Convert to number
+            amount: parseInt(amount), 
             category,
             notes,
             paidBy,
             type
         };
         onConfirm(formData);
+        if(savedCategories.length == 0){
+            console.log("add new category" + category)
+            await addCategoryToConfig(familyId,category)
+        }
     };
+
+
+    const handleCategoryFetching = async (searchTerm: string) => {
+        const unsubscribe = getCategoriesByFamilyId(familyId, searchTerm, (fetchedCategories) => {
+            setSavedCategories(fetchedCategories);
+            setCategory(searchTerm)
+            setCategorySelected(true)
+        });
+    };
+
+    const handleCategory = async (selectedCategory: string) => {
+        setCategory(selectedCategory)
+        setCategorySelected(false)
+    }
+
+
+    if (loading) return <div>Loading...</div>;
+
 
     return (
         <Container disableGutters maxWidth="sm">
@@ -67,8 +121,18 @@ const TransactionForm: React.FC<FinanceFormProps> = ({ type, onCancel, onConfirm
                             fullWidth
                             label="Category"
                             value={category}
-                            onChange={(e) => setCategory(e.target.value)}
+                            onChange={(event) => handleCategoryFetching(event.target.value)}
                         />
+                        {
+                            categorySelected && <IonList>
+                                {savedCategories.map((cat) => (
+                                    <IonItem key={cat} button onClick={() => handleCategory(cat)}>
+                                        <IonLabel>{cat}</IonLabel>
+                                    </IonItem>
+                                ))}
+                            </IonList>
+                        }
+
                     </Grid>
                     <Grid item xs={12}>
                         <TextField
@@ -112,6 +176,21 @@ const TransactionForm: React.FC<FinanceFormProps> = ({ type, onCancel, onConfirm
                             Save
                         </Button>
                     </Grid>
+                </Grid>
+
+                <Grid container spacing={2}>
+                    <Grid>
+                        <Label>POPULAR CATEGORIES : </Label>
+                    </Grid>
+                    <Grid item xs={12} sx={{ mt: 2 }}>
+
+                        {incomeCategories.map((category, index) => (
+                            <Chip key={index} label={category} variant="outlined" />
+                        ))}
+
+
+                    </Grid>
+
                 </Grid>
             </Box>
         </Container>

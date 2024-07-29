@@ -1,7 +1,9 @@
 import React from 'react';
-import { IonButton, IonText, IonSpinner, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonList, IonItem, IonLabel, IonIcon } from '@ionic/react';
+import { IonButton, IonText, IonSpinner, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonList, IonItem, IonLabel, IonIcon, IonListHeader, IonAccordion } from '@ionic/react';
 import { trashBinOutline } from 'ionicons/icons';
 import { Task } from '../../components/interfaces/TaskInterface'
+import Divider from '@mui/material/Divider';
+
 
 
 interface TaskListProps {
@@ -10,7 +12,7 @@ interface TaskListProps {
   deleteTask: (task: Task) => void;
   loading: boolean;
   currentUser: string;
-  
+
 }
 
 const TaskList: React.FC<TaskListProps> = ({ tasks, currentUser, updateStatus, loading, deleteTask }) => {
@@ -30,29 +32,38 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, currentUser, updateStatus, l
             </IonText>
           ) : (
             inProgressTasks.map((task, index) => (
+              <>
               <IonCard
                 key={index}
-                style={{
-                  backgroundColor: index % 2 === 0 ? '#f0f0f0' : '#ffffff',
-                }}
+                
               >
                 <IonCardHeader>
                   <IonCardTitle>{task.taskName}</IonCardTitle>
                   <IonCardSubtitle>Due by: {task.dueDate}</IonCardSubtitle>
                   <IonCardSubtitle>Created by: {task.createdBy}</IonCardSubtitle>
+                  
                 </IonCardHeader>
-                <IonCardContent>
+                <IonCardContent style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>{/* Add other content if needed */}</div>
                   <IonButton color="primary" onClick={() => updateStatus(task)}>Mark as Done</IonButton>
                 </IonCardContent>
               </IonCard>
+              
+              </>
             ))
           )}
 
+          <Divider component="li" />
+
+
           {completedTasks.length > 0 && (
             <IonList>
-              <IonText color="medium">
-                <p style={{ textAlign: 'center', marginTop: '20px' }}>Completed Tasks</p>
-              </IonText>
+
+              <IonListHeader>
+                <IonText >
+                  <h1>Completed Task</h1>
+                </IonText>
+              </IonListHeader>
               {completedTasks.map((task, index) => (
                 <IonItem key={index}>
                   <IonLabel>
