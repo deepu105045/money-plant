@@ -137,8 +137,8 @@
     
             // Sort the grouped data by amount in descending order
             const sortedResult = Object.keys(result).reduce((acc, type) => {
-                acc[type] = Object.entries(result[type])
-                    .sort((a, b) => b[1] - a[1]) // Sort by amount in descending order
+                acc[type] = (Object.entries(result[type]) as [string, number][])
+                    .sort(([, aAmount], [, bAmount]) => bAmount - aAmount) // Sort by amount in descending order
                     .reduce((obj, [category, amount]) => {
                         obj[category] = amount;
                         return obj;
@@ -151,7 +151,7 @@
             console.error("Error grouping transactions by type and category:", error);
         });
     };
-    
+        
     export const deleteTransaction = async (familyId: string, year: number, month: number, transactionId: string): Promise<void> => {
         try {
             // The collection path is updated to 'cashflowNew'

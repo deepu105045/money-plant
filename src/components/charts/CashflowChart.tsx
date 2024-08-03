@@ -46,7 +46,7 @@ const CashflowChart: React.FC<FinanceChartProps> = ({ data }) => {
     plugins: {
       legend: {
         display: true,
-        position: 'top',
+        position: 'top' as const, // Corrected here
       },
       title: {
         display: true,
@@ -69,7 +69,7 @@ const CashflowChart: React.FC<FinanceChartProps> = ({ data }) => {
     },
   };
 
-  return <Chart type='bar' data={chartData} options={options} />;
+  return <Chart type="bar" data={chartData} options={options} />;
 };
 
 export default CashflowChart;
