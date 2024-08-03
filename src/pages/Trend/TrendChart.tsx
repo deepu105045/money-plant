@@ -4,7 +4,7 @@ import { IonContent, IonPage } from '@ionic/react';
 import { AppBar, Toolbar, IconButton, Typography, Box } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useParams, useHistory, Link } from 'react-router-dom';
-import { getAllMonthlyDataByType } from '../../components/firebase/finance'
+// import { getAllMonthlyDataByType } from '../../components/firebase/finance'
 
 const TrendChart: React.FC = () => {
 
@@ -19,24 +19,24 @@ const TrendChart: React.FC = () => {
     history.goBack();
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-        try {
-            console.log("Get data for graph")
-            setLoading(true);
-            const fetchedData = await getAllMonthlyDataByType(id);
-            setData(fetchedData);
-            console.log(fetchData)
-        } catch (err) {
-            console.error("Failed to fetch data", err);
-            setError("Failed to fetch data");
-        } finally {
-            setLoading(false);
-        }
-    };
+//   useEffect(() => {
+//     const fetchData = async () => {
+//         try {
+//             console.log("Get data for graph")
+//             setLoading(true);
+//             const fetchedData = await getAllMonthlyDataByType(id);
+//             setData(fetchedData);
+//             console.log(fetchData)
+//         } catch (err) {
+//             console.error("Failed to fetch data", err);
+//             setError("Failed to fetch data");
+//         } finally {
+//             setLoading(false);
+//         }
+//     };
 
-    fetchData();
-}, [id]);
+//     fetchData();
+// }, [id]);
 
 if (loading) return <div>Loading...</div>;
 if (error) return <div>{error}</div>;

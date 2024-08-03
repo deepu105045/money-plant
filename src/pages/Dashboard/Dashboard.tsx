@@ -9,7 +9,7 @@ import { fetchUserHomes } from '../../components/firebase/homeData';
 import { signOutUser } from '../../components/firebase/auth';
 import tasksImg from '../../assets/tasks.jpg';
 import homeImg from '../../assets/homes/home1.png';
-import day from '../../assets/day.png'
+import asset from '../../assets/asset3.png'
 import { IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonCol, IonContent, IonGrid, IonIcon, IonImg, IonPage, IonRow } from '@ionic/react';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
@@ -70,6 +70,8 @@ const HomeCard: React.FC<HomeCardProps> = ({ home, onClick }) => {
   );
 };
 
+
+
 const TaskCard: React.FC<{ onClick: () => void }> = ({ onClick }) => (
   <IonGrid>
     <IonCol size="6" sizeSm="6" sizeMd="4">
@@ -88,7 +90,7 @@ const MyAssetsCard: React.FC<{ onClick: () => void }> = ({ onClick }) => (
   <IonGrid>
     <IonCol size="6" sizeSm="6" sizeMd="4">
       <IonCard button onClick={onClick} style={cardStyles}>
-        <IonImg src={day} alt="Day Manager" style={mediaStyles} />
+        <IonImg src={asset} alt="Day Manager" style={mediaStyles} />
         <IonCardHeader>
           <IonCardTitle>Our Assets</IonCardTitle>
         </IonCardHeader>

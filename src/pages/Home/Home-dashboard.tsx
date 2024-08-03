@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
-    IonContent, IonHeader, IonIcon, IonLabel, IonList, IonPage, IonRouterOutlet,
-    IonTitle, IonToolbar, IonModal, IonButton, IonFooter, IonGrid, IonRow, IonCol
+    IonContent, IonIcon, IonLabel, IonPage,
+    IonToolbar, IonModal, IonButton, IonFooter
 } from '@ionic/react';
 import { walletOutline, cardOutline, cashOutline, listOutline } from 'ionicons/icons';
 import { useParams, useHistory, Link } from 'react-router-dom';
@@ -15,7 +15,7 @@ import { fetchMembersByHome } from '../../components/firebase/homeData';
 import { useSelector } from 'react-redux';
 import { selectUserInfo } from '../../state/userSlice';
 import { addTransactions } from '../../components/firebase/finance';
-import './HomeDashboard.css'; // Import the custom CSS file
+import './HomeDashboard.css'; 
 import MonthYearLabel from './MonthYearLabel';
 
 const HomeDashboard: React.FC = () => {
@@ -35,6 +35,7 @@ const HomeDashboard: React.FC = () => {
         const fetchPaidByOptions = async () => {
             try {
                 const familyData = await fetchMembersByHome(id);
+
                 if (familyData) {
                     setPaidByOptions(familyData.members || []);
                 }
