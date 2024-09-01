@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AppBar, Toolbar, Typography, Button, IconButton, Box,Divider 
-} from '@mui/material';
+import { AppBar, Toolbar, Typography, Button, IconButton, Box, Divider } from '@mui/material';
 import { useSelector, useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { logOutOutline } from 'ionicons/icons';
@@ -9,7 +8,7 @@ import { fetchUserHomes } from '../../components/firebase/homeData';
 import { signOutUser } from '../../components/firebase/auth';
 import tasksImg from '../../assets/tasks.jpg';
 import homeImg from '../../assets/homes/home1.png';
-import asset from '../../assets/asset3.png'
+import asset from '../../assets/asset3.png';
 import { IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonCol, IonContent, IonGrid, IonIcon, IonImg, IonPage, IonRow } from '@ionic/react';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
@@ -39,64 +38,44 @@ const HomeCard: React.FC<HomeCardProps> = ({ home, onClick }) => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   return (
-    <>
-      <IonGrid>
-      <IonCol size="6" sizeSm="6" sizeMd="6">
-      <IonCard button onClick={onClick} style={cardStyles}>
-        <IonCardHeader>
-          <IonCardTitle style={{ lineHeight: 1.2 }}>
-            {home.name}
-          </IonCardTitle>
-        </IonCardHeader>
-        <IonImg src={homeImg} alt="Home" style={mediaStyles} />
-        <IonCardContent>
-          <IonCardTitle
-            style={{
-              lineHeight: 1.2,
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              fontSize: isMobile ? '1rem' : '1.25rem',
-            }}
-          >
-            Expense Tracker
-          </IonCardTitle>
-        </IonCardContent>
-      </IonCard>
-      </IonCol>
-     
-      </IonGrid>
-    </>
+    <IonCard onClick={onClick} style={cardStyles}>
+      {/* <IonCardHeader>
+        <IonCardTitle style={{ lineHeight: 1.2 }}>{home.name}</IonCardTitle>
+      </IonCardHeader> */}
+      <IonImg src={homeImg} alt="Home" style={mediaStyles} />
+      <IonCardContent>
+        <IonCardTitle
+          style={{
+            lineHeight: 1.2,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            fontSize: isMobile ? '1rem' : '1.25rem',
+          }}
+        >
+          Expense Tracker
+        </IonCardTitle>
+      </IonCardContent>
+    </IonCard>
   );
 };
 
-
-
 const TaskCard: React.FC<{ onClick: () => void }> = ({ onClick }) => (
-  <IonGrid>
-    <IonCol size="6" sizeSm="6" sizeMd="4">
-      <IonCard button onClick={onClick} style={cardStyles}>
-        <IonImg src={tasksImg} alt="Task Manager" style={mediaStyles} />
-        <IonCardHeader>
-          <IonCardTitle>Task</IonCardTitle>
-        </IonCardHeader>
-      </IonCard>
-    </IonCol>
-  </IonGrid>
+  <IonCard onClick={onClick} style={cardStyles}>
+    <IonImg src={tasksImg} alt="Task Manager" style={mediaStyles} />
+    <IonCardHeader>
+      <IonCardTitle>Task</IonCardTitle>
+    </IonCardHeader>
+  </IonCard>
 );
 
-
 const MyAssetsCard: React.FC<{ onClick: () => void }> = ({ onClick }) => (
-  <IonGrid>
-    <IonCol size="6" sizeSm="6" sizeMd="4">
-      <IonCard button onClick={onClick} style={cardStyles}>
-        <IonImg src={asset} alt="Day Manager" style={mediaStyles} />
-        <IonCardHeader>
-          <IonCardTitle>Our Assets</IonCardTitle>
-        </IonCardHeader>
-      </IonCard>
-    </IonCol>
-  </IonGrid>
+  <IonCard onClick={onClick} style={cardStyles}>
+    <IonImg src={asset} alt="My assets" style={mediaStyles} />
+    <IonCardHeader>
+      <IonCardTitle>Our Assets</IonCardTitle>
+    </IonCardHeader>
+  </IonCard>
 );
 
 const Dashboard: React.FC = () => {
@@ -119,7 +98,7 @@ const Dashboard: React.FC = () => {
   }, [userInfo?.email]);
 
   const handleLogout = async () => {
-    dispatch(setUserInfo({ username: "Guest", email: "" }));
+    dispatch(setUserInfo({ username: 'Guest', email: '' }));
     await signOutUser();
     history.push('/login');
   };
@@ -150,23 +129,26 @@ const Dashboard: React.FC = () => {
       </AppBar>
       <IonContent>
         <IonGrid>
-          <IonRow>
-            <IonCol>
-              {homes.map((home) => (
-                <HomeCard key={home.id} home={home} onClick={() => navigateTo(`/home/${home.familyid}`)} />
-              ))}
-            </IonCol>
-          </IonRow>
-          <Divider sx={{ margin: 2 }} />
+          {homes.map((home) => (
+            <IonRow key={home.id}>
+              <IonCol size="12">
+                <Typography variant="h5" component="div" sx={{ margin: 2, textAlign: 'center' }}>
+                  {home.name}
+                </Typography>
+              </IonCol>
 
-          <IonRow>
-            <IonCol>
-              <TaskCard onClick={() => navigateTo('/task')} />
-            </IonCol>
-            <IonCol>
-              <MyAssetsCard onClick={() => navigateTo('/my-assets')} />
-            </IonCol>
-          </IonRow>
+              <IonCol size="12">
+                <HomeCard home={home} onClick={() => navigateTo(`/home/${home.familyid}`)} />
+              </IonCol>
+              <IonCol size="6">
+                <TaskCard onClick={() => navigateTo(`/home/${home.familyid}/tasks`)} />
+              </IonCol>
+              <IonCol size="6">
+                <MyAssetsCard onClick={() => navigateTo(`/home/${home.familyid}/my-assets`)} />
+              </IonCol>
+            </IonRow>
+          ))}
+          <Divider sx={{ margin: 2 }} />
         </IonGrid>
       </IonContent>
     </IonPage>

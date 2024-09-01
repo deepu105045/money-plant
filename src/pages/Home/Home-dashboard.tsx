@@ -14,7 +14,7 @@ import ViewTransactions from './ViewTransactions';
 import { fetchMembersByHome } from '../../components/firebase/homeData';
 import { useSelector } from 'react-redux';
 import { selectUserInfo } from '../../state/userSlice';
-import { addTransactions } from '../../components/firebase/finance';
+import { addTransactions, migrateData } from '../../components/firebase/finance';
 import './HomeDashboard.css'; 
 import MonthYearLabel from './MonthYearLabel';
 
@@ -32,6 +32,8 @@ const HomeDashboard: React.FC = () => {
     const [triggerFetch, setTriggerFetch] = useState(false);
 
     useEffect(() => {
+
+        
         const fetchPaidByOptions = async () => {
             try {
                 const familyData = await fetchMembersByHome(id);
@@ -49,6 +51,8 @@ const HomeDashboard: React.FC = () => {
 
     const handleBack = () => {
         history.goBack();
+        console.log("Going to migrater data")
+        // migrateData('familyId')
     };
 
     const handleConfirm = async (formData: any) => {
@@ -173,3 +177,4 @@ const HomeDashboard: React.FC = () => {
 };
 
 export default HomeDashboard;
+

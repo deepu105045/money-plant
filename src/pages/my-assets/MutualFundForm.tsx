@@ -1,33 +1,36 @@
 import React, { useState } from 'react';
 import { Box, Button, TextField, Typography } from '@mui/material';
+import { MF } from '../../components/utils/Constants'
 
 interface MutualFundDetails {
     accountHolderName: string;
     date: string;
-    totalInvested: string;
-    currentValue: string;
+    invested: string;
+    amount: string;
 }
 
 interface MutualFundFormProps {
     onSubmit: (details: MutualFundDetails) => void;
+    title: string;  // Added title prop
 }
 
-const MutualFundForm: React.FC<MutualFundFormProps> = ({ onSubmit }) => {
+const MutualFundForm: React.FC<MutualFundFormProps> = ({ onSubmit, title ,assetType}) => {  // Destructure title prop
     const [accountHolderName, setAccountHolderName] = useState('');
     const [date, setDate] = useState('');
-    const [totalInvested, setTotalInvested] = useState('');
-    const [currentValue, setCurrentValue] = useState('');
+    const [invested, setInvested] = useState('');
+    const [amount, setAmount] = useState('');
 
     const handleSubmit = () => {
-        if (accountHolderName && date && totalInvested && currentValue) {
-            onSubmit({ accountHolderName, date, totalInvested, currentValue });
+
+        if (accountHolderName && amount) {
+            onSubmit({ accountHolderName, date, invested, amount, assetType });
         }
     };
 
     return (
         <Box component="form" noValidate autoComplete="off" sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
             <Typography variant="h6" component="h2" gutterBottom>
-                Add Mutual Fund Details
+                {title}  {/* Use title prop here */}
             </Typography>
             <TextField
                 label="Account Holder Name"
@@ -48,15 +51,15 @@ const MutualFundForm: React.FC<MutualFundFormProps> = ({ onSubmit }) => {
             <TextField
                 label="Total Amount Invested"
                 type="number"
-                value={totalInvested}
-                onChange={(e) => setTotalInvested(e.target.value)}
+                value={invested}
+                onChange={(e) => setInvested(e.target.value)}
                 fullWidth
             />
             <TextField
                 label="Current Value"
                 type="number"
-                value={currentValue}
-                onChange={(e) => setCurrentValue(e.target.value)}
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
                 fullWidth
             />
             <Button variant="contained" color="primary" onClick={handleSubmit}>

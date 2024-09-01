@@ -1,32 +1,73 @@
-import React, { useState } from 'react';
-import { IonContent, IonHeader, IonPage, IonLabel, IonAccordion, IonAccordionGroup, IonItem, IonButton } from '@ionic/react';
-import { useHistory } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import {
+    IonContent, IonHeader, IonPage, IonLabel, IonAccordion, IonAccordionGroup,
+    IonItem, IonButton, IonSpinner, IonGrid, IonRow, IonCol, IonCard, IonCardHeader, IonCardTitle, IonCardContent
+} from '@ionic/react';
+import { useHistory, useParams } from 'react-router-dom';
 import { AppBar, Toolbar, IconButton, Typography } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import AddIcon from '@mui/icons-material/Add';
 import MutualFundForm from './MutualFundForm';
 import BankDetailsForm from './BankDetailsForm';
 import RealEstateForm from './RealEstateForm';
+import { getTotalAssets, addAsset, getAssetByType } from '../../components/firebase/assetService';
+import { BANK, MF, STOCKS, REAL_ESTATE } from '../../components/utils/Constants';
+
+const ASSET_TYPES = [
+    { key: 'bank', label: 'BANK', form: BankDetailsForm, assetType: BANK },
+    { key: 'mutualFund', label: 'Mutual Fund', form: MutualFundForm, assetType: MF },
+    { key: 'stocks', label: 'Stocks', form: MutualFundForm, assetType: STOCKS },
+    { key: 'real-estate', label: 'Real Estate', form: RealEstateForm, assetType: REAL_ESTATE },
+];
 
 const MyAssetsDashboard: React.FC = () => {
     const history = useHistory();
+    const { id: familyId } = useParams<{ id: string }>();
     const [selectedForm, setSelectedForm] = useState<string | null>(null);
+    const [expandedAccordion, setExpandedAccordion] = useState<string | null>(null);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [assetData, setAssetData] = useState<{ [key: string]: { accounts: any[], total: number } }>({});
+    const [grandTotal, setGrandTotal] = useState<number>(0);
+    const [message, setMessage] = useState<string>('');
 
-    const handleBack = () => {
-        history.goBack();
-    };
+    useEffect(() => {
+        const fetchAllAssets = async () => {
+            setLoading(true);
+            setMessage("Wait, we're getting data from the server... have some patience!");
+            try {
+                const result = await getTotalAssets(familyId, ASSET_TYPES.map(type => type.assetType));
+                setAssetData(result.assets);
+                setGrandTotal(result.grandTotal);
+            } catch (error) {
+                console.error('Error fetching all assets:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    const handleOpenForm = (formType: string) => {
-        setSelectedForm(formType);
-    };
+        fetchAllAssets();
+    }, [familyId]);
 
-    const handleCloseForm = () => {
-        setSelectedForm(null);
-    };
+    const handleBack = () => history.goBack();
 
-    const handleNewRecord = (data: any) => {
-        console.log('Form Data Submitted:', data);
-        handleCloseForm(); // Close the form after submission
+    const handleOpenForm = (formType: string) => setSelectedForm(formType);
+
+    const handleCloseForm = () => setSelectedForm(null);
+
+    const handleNewRecord = async (data: any) => {
+        setLoading(true);
+        setMessage("Hang tight, updating your assets...");
+        try {
+            await addAsset(familyId, data, data.assetType);
+            const { accounts, total } = await getAssetByType(familyId, data.assetType);
+            setAssetData(prevState => ({ ...prevState, [data.assetType.toLowerCase()]: { accounts, total } }));
+            setGrandTotal(Object.values(assetData).reduce((acc, cur) => acc + cur.total, 0));
+        } catch (error) {
+            console.error('Error adding new record:', error);
+        } finally {
+            setLoading(false);
+        }
+        handleCloseForm();
     };
 
     return (
@@ -40,7 +81,7 @@ const MyAssetsDashboard: React.FC = () => {
                         <Typography variant="h6" component="div" style={{ flexGrow: 1 }}>
                             My Assets
                         </Typography>
-                        {selectedForm !== null && (
+                        {selectedForm && (
                             <IonButton color="inherit" onClick={handleCloseForm} aria-label="close">
                                 Close Form
                             </IonButton>
@@ -49,97 +90,64 @@ const MyAssetsDashboard: React.FC = () => {
                 </AppBar>
             </IonHeader>
             <IonContent className="ion-padding" style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-                {selectedForm === null ? (
-                    <IonAccordionGroup>
-                        <IonAccordion value="bank">
-                            <IonItem slot="header" color="light">
-                                <IonLabel>BANK</IonLabel>
-                                <IconButton color="inherit" onClick={() => handleOpenForm('BANK')}>
-                                    <AddIcon />
-                                </IconButton>
-                            </IonItem>
-                            <div className="ion-padding" slot="content">
-                                {/* Bank details content or form goes here */}
-                            </div>
-                        </IonAccordion>
-                        <IonAccordion value="mutualFund">
-                            <IonItem slot="header" color="light">
-                                <IonLabel>Mutual Fund</IonLabel>
-                                <IconButton color="inherit" onClick={() => handleOpenForm('Mutual Fund')}>
-                                    <AddIcon />
-                                </IconButton>
-                            </IonItem>
-                            <div className="ion-padding" slot="content">
-                                {/* Mutual Fund details content or form goes here */}
-                            </div>
-                        </IonAccordion>
-                        <IonAccordion value="stocks">
-                            <IonItem slot="header" color="light">
-                                <IonLabel>Stocks</IonLabel>
-                                <IconButton color="inherit" onClick={() => handleOpenForm('Mutual Fund')}>
-                                    <AddIcon />
-                                </IconButton>
-                            </IonItem>
-                            <div className="ion-padding" slot="content">
-                                {/* Mutual Fund details content or form goes here */}
-                            </div>
-                        </IonAccordion>
-                        <IonAccordion value="realEstate">
-                            <IonItem slot="header" color="light">
-                                <IonLabel>Real Estate</IonLabel>
-                                <IconButton color="inherit" onClick={() => handleOpenForm('Real Estate')}>
-                                    <AddIcon />
-                                </IconButton>
-                            </IonItem>
-                            <div className="ion-padding" slot="content">
-                            </div>
-                        </IonAccordion>
-                        <IonAccordion value="ppf">
-                            <IonItem slot="header" color="light">
-                                <IonLabel>PPF</IonLabel>
-                                <IconButton color="inherit" onClick={() => handleOpenForm('PPF')}>
-                                    <AddIcon />
-                                </IconButton>
-                            </IonItem>
-                            <div className="ion-padding" slot="content">
-                            </div>
-                        </IonAccordion>
-                        <IonAccordion value="nps">
-                            <IonItem slot="header" color="light">
-                                <IonLabel>NPS</IonLabel>
-                                <IconButton color="inherit" onClick={() => handleOpenForm('NPS')}>
-                                    <AddIcon />
-                                </IconButton>
-                            </IonItem>
-                            <div className="ion-padding" slot="content">
-                            </div>
-                        </IonAccordion>
-                        <IonAccordion value="iOwed">
-                            <IonItem slot="header" color="light">
-                                <IonLabel>I Owed</IonLabel>
-                                <IconButton color="inherit" onClick={() => handleOpenForm('I Owed')}>
-                                    <AddIcon />
-                                </IconButton>
-                            </IonItem>
-                            <div className="ion-padding" slot="content">
-                            </div>
-                        </IonAccordion>
-                        <IonAccordion value="insurance">
-                            <IonItem slot="header" color="light">
-                                <IonLabel>Insurance</IonLabel>
-                                <IconButton color="inherit" onClick={() => handleOpenForm('Insurance')}>
-                                    <AddIcon />
-                                </IconButton>
-                            </IonItem>
-                            <div className="ion-padding" slot="content">
-                            </div>
-                        </IonAccordion>
+                {/* Funky Card for Grand Total */}
+                <IonCard style={{ background: 'linear-gradient(45deg, #ff6f00, #ff8f00)', color: '#fff', borderRadius: '15px', marginBottom: '20px' }}>
+                    <IonCardHeader>
+                        <IonCardTitle style={{ textAlign: 'center', fontSize: '2rem' }}>Grand Total</IonCardTitle>
+                    </IonCardHeader>
+                    <IonCardContent style={{ textAlign: 'center', fontSize: '1.5rem', fontWeight: 'bold' }}>
+                        ₹ {grandTotal.toLocaleString('en-IN')}
+                    </IonCardContent>
+                </IonCard>
+
+                {!selectedForm ? (
+                    <IonAccordionGroup value={expandedAccordion} onIonChange={(e) => setExpandedAccordion(e.detail.value)}>
+                        {ASSET_TYPES.map(({ key, label, assetType }) => (
+                            <IonAccordion key={assetType} value={assetType}>
+                                <IonItem slot="header" color="light">
+                                    <IonLabel>{label}</IonLabel>
+                                    <IconButton color="inherit" onClick={() => handleOpenForm(label)}>
+                                        <AddIcon />
+                                    </IconButton>
+                                </IonItem>
+                                <div className="ion-padding" slot="content">
+                                    {loading ? (
+                                        <>
+                                            <IonSpinner name="crescent" />
+                                            <div style={{ textAlign: 'center', marginTop: '10px', fontStyle: 'italic', fontSize: '1.2rem' }}>
+                                                {message}
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <div>
+                                            <IonGrid style={{ border: '1px solid #000', padding: '10px' }}>
+                                                <IonRow style={{ backgroundColor: '#f0f0f0' }}>
+                                                    <IonCol style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>Total</IonCol>
+                                                    <IonCol style={{ fontWeight: 'bold', fontSize: '1.2rem', textAlign: 'left' }}>
+                                                        {assetData[assetType]?.total || 0}
+                                                    </IonCol>
+                                                </IonRow>
+                                            </IonGrid>
+
+                                            {assetData[assetType]?.accounts.map((account, index) => (
+                                                <IonGrid key={index} style={{ border: '1px solid #000' }}>
+                                                    <IonRow>
+                                                        <IonCol>{account.accountHolderName}</IonCol>
+                                                        <IonCol>{account.amount}</IonCol>
+                                                    </IonRow>
+                                                </IonGrid>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </IonAccordion>
+                        ))}
                     </IonAccordionGroup>
                 ) : (
                     <>
-                        {selectedForm === 'BANK' && <BankDetailsForm onSubmit={handleNewRecord} />}
-                        {selectedForm === 'Mutual Fund' && <MutualFundForm onSubmit={handleNewRecord} />}
-                        {selectedForm === 'Real Estate' && <RealEstateForm onSubmit={handleNewRecord} />}
+                        {ASSET_TYPES.map(({ label, form: FormComponent, assetType }) => (
+                            selectedForm === label && <FormComponent key={label} title={`Add ${label}`} assetType={assetType} onSubmit={handleNewRecord} />
+                        ))}
                     </>
                 )}
             </IonContent>

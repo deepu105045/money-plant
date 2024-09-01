@@ -23,6 +23,8 @@ import '@ionic/react/css/text-alignment.css';
 import '@ionic/react/css/text-transformation.css';
 import '@ionic/react/css/flex-utils.css';
 import '@ionic/react/css/display.css';
+import './index.css';
+
 
 /**
  * Ionic Dark Mode
@@ -63,11 +65,9 @@ const App: React.FC = () => (
             <Route path='/dashboard' component={Dashboard}></Route>
             <Route path="/register" component={Registration}></Route>
             
-            <Route path="/home/:id" component={HomeDashboard} />
-            <Route path="/home/:id/trend" component={TrendChart} />
-
-            <Route path= "/task" component={Tasks}/>
-            <Route path= "/my-assets" component={MyAssetsDashboard}/>
+            <Route path= "/home/:id" component={HomeDashboard} />
+            <Route path= "/home/:id/tasks" component={Tasks}/>
+            <Route path= "/home/:id/my-assets" component={MyAssetsDashboard}/>
 
           </IonRouterOutlet>
         </IonReactRouter>

@@ -168,11 +168,11 @@
   
     export const migrateData = async (familyId:string) => {
         try {
-            const startYear = 2021;
+            const startYear = 2024;
             const currentYear = new Date().getFullYear();
     
             for (let year = startYear; year <= currentYear; year++) {
-                for (let month = 1; month <= 12; month++) {
+                for (let month = 7; month <= 8; month++) {
                     const oldTransactionsRef = collection(db, `cashflow/${familyId}/${year}/${month}/transactions`);
                     const q = query(oldTransactionsRef);
                     const querySnapshot = await getDocs(q);
@@ -184,8 +184,7 @@
                         const newTransactionsRef = collection(db, `cashflowNew/${familyId}/transactions`);
                         await addDoc(newTransactionsRef, data);
     
-                        // Optionally, delete the old document
-                        // await deleteDoc(doc.ref);
+                        
                     }
                 }
             }

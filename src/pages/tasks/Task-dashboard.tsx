@@ -5,8 +5,8 @@ import TaskList from './TaskList';
 import TaskForm from './TaskForm';
 import { AppBar, Toolbar, IconButton, Typography, Box } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { useHistory } from 'react-router-dom';
-import { addTask, updateTask, deleteTask, findTasksByEmail } from '../../components/firebase/tasksService';
+import { useHistory, useParams } from 'react-router-dom';
+import { addTask, updateTask, deleteTask, getTasksByFamilyId } from '../../components/firebase/tasksService'; // Import getTasksByFamilyId
 import { useSelector } from 'react-redux';
 import { selectUserInfo } from '../../state/userSlice';
 import { findFamilyMembersByEmail } from '../../components/firebase/homeData';
@@ -23,6 +23,7 @@ const TaskDashboard: React.FC = () => {
     const [currentUser, setCurrentUser] = useState<string | null>(null);
     const [members, setMembers] = useState<string[]>([]);
     const [reloadTasks, setReloadTasks] = useState(false);
+    const { id: familyId } = useParams<{ id: string }>();
 
     useEffect(() => {
         if (userInfo) {
@@ -35,8 +36,8 @@ const TaskDashboard: React.FC = () => {
             if (!currentUser) return;
 
             try {
-                const userTasks = await findTasksByEmail(currentUser);
-                setTasks(userTasks);
+                const familyTasks = await getTasksByFamilyId(familyId); // Fetch tasks by familyId
+                setTasks(familyTasks);
                 const mem = await findFamilyMembersByEmail(currentUser);
                 setMembers(mem);
             } catch (error) {
@@ -47,7 +48,7 @@ const TaskDashboard: React.FC = () => {
         };
 
         fetchTasksAndMembers();
-    }, [currentUser, reloadTasks]);
+    }, [currentUser, familyId, reloadTasks]); // Ensure familyId is included in the dependency array
 
     const handleSaveTask = (taskName: string, dueDate: string, assignedTo: string[]) => {
         if (!currentUser) return;
@@ -61,7 +62,7 @@ const TaskDashboard: React.FC = () => {
             status: 'Start'
         };
 
-        addTask(newTask);
+        addTask(familyId, newTask);
         setReloadTasks(prev => !prev);
         setShowForm(false);
     };
@@ -72,14 +73,14 @@ const TaskDashboard: React.FC = () => {
 
     const handleCompleteTask = async (task: Task) => {
         task.status = 'Done';
-        await updateTask(task);
+        await updateTask(familyId, task);
         setReloadTasks(prev => !prev);
     };
 
     const handleDeleteTask = async (task: Task) => {
         try {
             if (task.taskId) {
-                await deleteTask(task.taskId);
+                await deleteTask(familyId, task.taskId);
                 setTasks(tasks.filter(t => t.taskId !== task.taskId));
                 setCompletedTasks(completedTasks.filter(t => t.taskId !== task.taskId));
                 setToastMessage(`Task "${task.taskName}" deleted successfully.`);

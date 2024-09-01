@@ -1,0 +1,4 @@
+ionic build 
+firebase init
+ over ride is No
+fireabase deploy

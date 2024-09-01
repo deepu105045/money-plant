@@ -1,6 +1,7 @@
 // src/components/BankDetailsForm.tsx
 import React, { useState } from 'react';
 import { TextField, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, Button } from '@mui/material';
+import { BANK } from '../../components/utils/Constants';
 
 interface BankDetailsFormProps {
     onSubmit: (data: any) => void;
@@ -18,6 +19,7 @@ const BankDetailsForm: React.FC<BankDetailsFormProps> = ({ onSubmit }) => {
     const [date, setDate] = useState<string | null>(today); // Default to today's date
 
     const handleSave = () => {
+
         const formData = {
             accountHolderName,
             bankName,
@@ -25,8 +27,8 @@ const BankDetailsForm: React.FC<BankDetailsFormProps> = ({ onSubmit }) => {
             accountType,
             amount,
             date,
+            assetType:BANK
         };
-        console.log('Saved:', formData);
         onSubmit(formData); // Call the parent-provided onSubmit function
     };
 

@@ -1,28 +1,25 @@
-import {  deleteDoc, collection, doc, getDocs, query, setDoc, where } 
+import {  deleteDoc, collection, doc, getDocs, query, setDoc, where, CollectionReference, DocumentData, addDoc } 
       from "firebase/firestore";
 import { db } from "./firebaseConfig";
 import { Task } from "../interfaces/TaskInterface";
 
-export const addTask = async (taskObj: Task) => {
+export const addTask = async (familyId: string, taskObj: Task) => {
   try {
-    const ref = doc(collection(db, 'tasks'));
-    const taskId = ref.id;
-    const taskWithId = { ...taskObj, taskId };
-
-    await setDoc(ref, taskWithId);
-    console.log('Task data saved successfully with ID:', taskId);
+    const ref = collection(db, `tasks/${familyId}/allTasks`);
+    const docRef = await addDoc(ref, taskObj);
+    console.log('Task data saved successfully with ID:', docRef.id);
   } catch (error) {
     console.error('Error saving task data:', error);
     throw error;
   }
 };
 
-export const updateTask = async (task: Task) => {
+export const updateTask = async (familyId: string, task: Task) => {
   try {
     if (!task.taskId) {
       throw new Error('Task ID is required to update a task');
     }
-    const taskRef = doc(db, 'tasks', task.taskId);
+    const taskRef = doc(db, `tasks/${familyId}/allTasks`, task.taskId);
     await setDoc(taskRef, task, { merge: true });
     console.log('Task updated successfully.');
   } catch (error) {
@@ -31,9 +28,9 @@ export const updateTask = async (task: Task) => {
   }
 };
 
-export const deleteTask = async (taskId: string) => {
+export const deleteTask = async (familyId: string, taskId: string) => {
   try {
-    const taskRef = doc(db, 'tasks', taskId);
+    const taskRef = doc(db, `tasks/${familyId}/allTasks`, taskId);
     await deleteDoc(taskRef);
     console.log('Task deleted successfully with ID:', taskId);
   } catch (error) {
@@ -41,6 +38,25 @@ export const deleteTask = async (taskId: string) => {
     throw error;
   }
 };
+
+export const getTasksByFamilyId = async (familyId: string) => {
+  try {
+    const tasksRef = collection(db, `tasks/${familyId}/allTasks`);
+    const tasksQuery = query(tasksRef);
+    const querySnapshot = await getDocs(tasksQuery);
+
+    const tasks = querySnapshot.docs.map(doc => ({
+      ...doc.data(),
+      taskId: doc.id
+    }));
+
+    return tasks;
+  } catch (error) {
+    console.error('Error fetching tasks:', error);
+    throw error;
+  }
+};
+
 
 export const findTasksByEmail = async (userEmail: string): Promise<Task[]> => {
   const tasksRef = collection(db, 'tasks');
@@ -73,4 +89,6 @@ export const findTasksByEmail = async (userEmail: string): Promise<Task[]> => {
 
   return uniqueTasks;
 };
+
+
 

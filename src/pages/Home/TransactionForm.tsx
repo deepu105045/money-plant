@@ -20,7 +20,7 @@ interface FinanceFormProps {
 const TransactionForm: React.FC<FinanceFormProps> = ({ type, onCancel, onConfirm, paidByOptions, currentUser }) => {
     const [date, setDate] = useState('');
     const [amount, setAmount] = useState('');
-    const [notes, setNotes] = useState('');
+    // const [notes, setNotes] = useState('');
     const [paidBy, setPaidBy] = useState(currentUser);
     const [category, setCategory] = useState('');
     const [savedCategories, setSavedCategories] = useState<string[]>([]);
@@ -58,7 +58,6 @@ const TransactionForm: React.FC<FinanceFormProps> = ({ type, onCancel, onConfirm
             date: new Date(date),
             amount: parseInt(amount),
             category,
-            notes,
             paidBy,
             type
         };
@@ -135,7 +134,7 @@ const TransactionForm: React.FC<FinanceFormProps> = ({ type, onCancel, onConfirm
                             onChange={(e) => setAmount(e.target.value)}
                         />
                     </Grid>
-                    <Grid item xs={12}>
+                    {/* <Grid item xs={12}>
                         <TextField
                             fullWidth
                             label="Notes"
@@ -144,7 +143,7 @@ const TransactionForm: React.FC<FinanceFormProps> = ({ type, onCancel, onConfirm
                             value={notes}
                             onChange={(e) => setNotes(e.target.value)}
                         />
-                    </Grid>
+                    </Grid> */}
                     <Grid item xs={12}>
                         <FormControl component="fieldset">
                             <FormLabel component="legend">Paid By</FormLabel>
