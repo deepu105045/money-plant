@@ -129,14 +129,7 @@ const MyAssetsDashboard: React.FC = () => {
                                                 </IonRow>
                                             </IonGrid>
 
-                                            {assetData[assetType]?.accounts.map((account, index) => (
-                                                <IonGrid key={index} style={{ border: '1px solid #000' }}>
-                                                    <IonRow>
-                                                        <IonCol>{account.accountHolderName}</IonCol>
-                                                        <IonCol>{account.amount}</IonCol>
-                                                    </IonRow>
-                                                </IonGrid>
-                                            ))}
+                                            
                                         </div>
                                     )}
                                 </div>

@@ -1,16 +1,42 @@
-import { collection, getDocs, query,  addDoc } 
+import { collection, getDocs, query,  addDoc,doc, deleteDoc,setDoc  } 
       from "firebase/firestore";
 import { db } from "./firebaseConfig";
 
 
 
-export const addAsset = async (familyId: string,  taskObj: any,type: string) => {
+export const addAsset = async (familyId: string, taskObj: any, type: string) => {
   try {
     const ref = collection(db, `assets/${familyId}/${type}`);
-    const docRef = await addDoc(ref, taskObj);
+    const docRef = await addDoc(ref, { ...taskObj, id: '' });
+    const updatedTaskObj = { ...taskObj, id: docRef.id };
+    await setDoc(docRef, updatedTaskObj, { merge: true });
+
     console.log(`${type} data saved successfully with ID:`, docRef.id);
   } catch (error) {
     console.error(`Error saving ${type} data:`, error);
+    throw error;
+  }
+};
+
+export const editAsset = async (familyId: string, taskObj: any, type: string) => {
+  try {
+    const docRef = doc(db, `assets/${familyId}/${type}/${taskObj.id}`);
+    await setDoc(docRef, taskObj, { merge: true });
+
+    console.log(`${type} data updated successfully with ID:`, taskObj.id);
+  } catch (error) {
+    console.error(`Error updating ${type} data:`, error);
+    throw error;
+  }
+};
+
+export const deleteAsset = async (familyId: string, assetId: string, type: string) => {
+  try {
+    const docRef = doc(db, `assets/${familyId}/${type}/${assetId}`);
+    await deleteDoc(docRef);
+    console.log(`${type} asset deleted successfully with ID:`, assetId);
+  } catch (error) {
+    console.error(`Error deleting ${type} asset:`, error);
     throw error;
   }
 };

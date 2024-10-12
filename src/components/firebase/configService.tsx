@@ -16,42 +16,64 @@ export const addCategoryToConfig = async (familyId: string, category: string): P
   };
 
 
-export const getCategoriesByFamilyId = (familyId: string, searchString: string, callback: (categories: string[]) => void) => {
-  try {
-    // Reference to the specific document in the 'config' collection
-    const configDocRef = doc(db, 'config', familyId);
+// export const getCategoriesByFamilyId = (familyId: string, searchString: string, callback: (categories: string[]) => void) => {
+//   try {
+//     // Reference to the specific document in the 'config' collection
+//     const configDocRef = doc(db, 'config', familyId);
     
-    // Subscribe to the document snapshot
-    const unsubscribe = onSnapshot(configDocRef, (docSnapshot) => {
-      // Check if the document exists and has a 'categories' field
-      if (docSnapshot.exists()) {
-        const data = docSnapshot.data();
-        const categories: string[] = data?.categories || [];
+//     // Subscribe to the document snapshot
+//     const unsubscribe = onSnapshot(configDocRef, (docSnapshot) => {
+//       // Check if the document exists and has a 'categories' field
+//       if (docSnapshot.exists()) {
+//         const data = docSnapshot.data();
+//         const categories: string[] = data?.categories || [];
         
-        // Convert search string to lowercase for case-insensitive matching
-        const lowercasedSearchString = searchString.toLowerCase();
+//         // Convert search string to lowercase for case-insensitive matching
+//         const lowercasedSearchString = searchString.toLowerCase();
         
-        // Filter categories based on the searchString
-        const filteredCategories = categories.filter(category => 
-          category.toLowerCase().includes(lowercasedSearchString)
-        );
+//         // Filter categories based on the searchString
+//         const filteredCategories = categories.filter(category => 
+//           category.toLowerCase().includes(lowercasedSearchString)
+//         );
         
-        // Invoke the callback with the filtered categories
-        callback(filteredCategories);
-      } else {
-        console.log(`No document found for familyId: ${familyId}`);
-        callback([]); // Return an empty array if no document is found
-      }
-    });
+//         // Invoke the callback with the filtered categories
+//         callback(filteredCategories);
+//       } else {
+//         console.log(`No document found for familyId: ${familyId}`);
+//         callback([]); // Return an empty array if no document is found
+//       }
+//     });
 
-    // Return the unsubscribe function to stop listening when needed
-    return unsubscribe;
+//     // Return the unsubscribe function to stop listening when needed
+//     return unsubscribe;
+//   } catch (error) {
+//     console.error('Error fetching categories:', error);
+//     throw error;
+//   }
+// };
+
+
+
+export const getCategoriesByFamilyId = async (familyId: string, searchString: string): Promise<string[]> => {
+  try {
+    const configDocRef = doc(db, 'config', familyId);    
+    const docSnapshot = await getDoc(configDocRef);    
+    if (docSnapshot.exists()) {
+      const data = docSnapshot.data();
+      const categories: string[] = data?.categories || [];      
+      const lowercasedSearchString = searchString.toLowerCase();      
+      return categories.filter(category => 
+        category.toLowerCase().includes(lowercasedSearchString)
+      );
+    } else {
+      console.log(`No document found for familyId: ${familyId}`);
+      return []; // Return an empty array if no document is found
+    }
   } catch (error) {
     console.error('Error fetching categories:', error);
-    throw error;
+    throw error; // Optionally rethrow the error if needed
   }
 };
-
 
 
 

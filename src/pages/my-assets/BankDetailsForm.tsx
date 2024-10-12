@@ -29,7 +29,7 @@ const BankDetailsForm: React.FC<BankDetailsFormProps> = ({ onSubmit }) => {
             date,
             assetType:BANK
         };
-        onSubmit(formData); // Call the parent-provided onSubmit function
+        onSubmit(formData); 
     };
 
     return (

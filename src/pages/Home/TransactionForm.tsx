@@ -7,7 +7,8 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import { getCategoriesByFamilyId, addCategoryToConfig, getPopularCategories } from '../../components/firebase/configService';
 import { IonList, IonItem, IonLabel } from '@ionic/react';
-import { INCOME , SPENDING , INVESTMENT } from '../../components/utils/Constants';
+import { INCOME, SPENDING, INVESTMENT } from '../../components/utils/Constants';
+import { debounce } from 'lodash'; // You can install lodash for debouncing
 
 interface FinanceFormProps {
     type: string;
@@ -20,7 +21,6 @@ interface FinanceFormProps {
 const TransactionForm: React.FC<FinanceFormProps> = ({ type, onCancel, onConfirm, paidByOptions, currentUser }) => {
     const [date, setDate] = useState('');
     const [amount, setAmount] = useState('');
-    // const [notes, setNotes] = useState('');
     const [paidBy, setPaidBy] = useState(currentUser);
     const [category, setCategory] = useState('');
     const [savedCategories, setSavedCategories] = useState<string[]>([]);
@@ -35,23 +35,35 @@ const TransactionForm: React.FC<FinanceFormProps> = ({ type, onCancel, onConfirm
 
         const fetchCategories = async () => {
             setLoading(true);
-
-            if (type === INCOME) {
-                const income = await getPopularCategories('popular-income');
-                setPopularCategories(income);
-            }else if(type === SPENDING){
-                const spending = await getPopularCategories('popular-spending');
-                setPopularCategories(spending)
-            }else if(type === INVESTMENT){
-                const investment = await getPopularCategories('popular-investment');
-                setPopularCategories(investment)
+            let categories = [];
+            switch (type) {
+                case INCOME:
+                    categories = await getPopularCategories('popular-income');
+                    break;
+                case SPENDING:
+                    categories = await getPopularCategories('popular-spending');
+                    break;
+                case INVESTMENT:
+                    categories = await getPopularCategories('popular-investment');
+                    break;
             }
-
+            setPopularCategories(categories);
             setLoading(false);
         };
 
         fetchCategories();
     }, [type]);
+
+    const handleCategoryFetching = async (searchTerm: string) => {
+        try {
+          const fetchedCategories = await getCategoriesByFamilyId(familyId, searchTerm);
+          setSavedCategories(fetchedCategories);
+          setCategory(searchTerm);
+          setCategorySelected(true);
+        } catch (error) {
+          console.error("Error fetching categories:", error);
+        }
+      };
 
     const handleSubmit = async () => {
         const formData = {
@@ -62,24 +74,19 @@ const TransactionForm: React.FC<FinanceFormProps> = ({ type, onCancel, onConfirm
             type
         };
         onConfirm(formData);
+
         if (savedCategories.length === 0) {
             console.log("Add new category: " + category);
             await addCategoryToConfig(familyId, category);
         }
     };
 
-    const handleCategoryFetching = async (searchTerm: string) => {
-        const unsubscribe = getCategoriesByFamilyId(familyId, searchTerm, (fetchedCategories) => {
-            setSavedCategories(fetchedCategories);
-            setCategory(searchTerm);
-            setCategorySelected(true);
-        });
-    };
-
-    const handleCategory = async (selectedCategory: string) => {
+    const handleCategorySelection = (selectedCategory: string) => {
         setCategory(selectedCategory);
         setCategorySelected(false);
-    }
+    };
+
+   
 
     if (loading) return <div>Loading...</div>;
 
@@ -118,7 +125,7 @@ const TransactionForm: React.FC<FinanceFormProps> = ({ type, onCancel, onConfirm
                         {categorySelected && (
                             <IonList>
                                 {savedCategories.map((cat) => (
-                                    <IonItem key={cat} button onClick={() => handleCategory(cat)}>
+                                    <IonItem key={cat} button onClick={() => handleCategorySelection(cat)}>
                                         <IonLabel>{cat}</IonLabel>
                                     </IonItem>
                                 ))}
@@ -134,16 +141,6 @@ const TransactionForm: React.FC<FinanceFormProps> = ({ type, onCancel, onConfirm
                             onChange={(e) => setAmount(e.target.value)}
                         />
                     </Grid>
-                    {/* <Grid item xs={12}>
-                        <TextField
-                            fullWidth
-                            label="Notes"
-                            multiline
-                            rows={2}
-                            value={notes}
-                            onChange={(e) => setNotes(e.target.value)}
-                        />
-                    </Grid> */}
                     <Grid item xs={12}>
                         <FormControl component="fieldset">
                             <FormLabel component="legend">Paid By</FormLabel>
@@ -172,7 +169,7 @@ const TransactionForm: React.FC<FinanceFormProps> = ({ type, onCancel, onConfirm
                             Popular Categories
                         </Typography>
                         {popularCategories.map((category, index) => (
-                            <Chip key={index} label={category} onClick={()=>setCategory(category)}  variant="outlined" />
+                            <Chip key={index} label={category} onClick={() => setCategory(category)} variant="outlined" />
                         ))}
                     </Grid>
                 </Grid>

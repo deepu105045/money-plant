@@ -48,6 +48,7 @@ import HomeDashboard from './pages/Home/Home-dashboard';
 import Tasks from './pages/tasks/Task-dashboard';
 import TrendChart from './pages/Trend/TrendChart';
 import MyAssetsDashboard from './pages/my-assets/MyAssetsDashboard';
+import BankPage from './pages/my-assets/bank/BankPage';
 
 
 setupIonicReact();
@@ -68,6 +69,8 @@ const App: React.FC = () => (
             <Route path= "/home/:id" component={HomeDashboard} />
             <Route path= "/home/:id/tasks" component={Tasks}/>
             <Route path= "/home/:id/my-assets" component={MyAssetsDashboard}/>
+
+            <Route path= "/home/:id/assets/bank" component={BankPage}/>
 
           </IonRouterOutlet>
         </IonReactRouter>
