@@ -10,35 +10,27 @@ import {
   IonFab,
   IonFabButton,
   IonIcon,
-  IonLoading // Import IonLoading for the loader
+  IonLoading 
 } from '@ionic/react';
 import { add } from 'ionicons/icons';
 import { getAssetByType, addAsset, deleteAsset, editAsset } from '../../../components/firebase/assetService';
 import { useHistory, useParams } from 'react-router-dom';
 import BankAccountList from './BankAccountList'; // Import the new component
 import BankAccountForm from './BankAccountForm';
-
 const BankPage: React.FC = () => {
-  const history = useHistory();
+  // const history = useHistory();
   const assetType = 'BANK';
   const { id: familyId } = useParams<{ id: string }>();
   const [bankAccounts, setBankAccounts] = useState<any[]>([]);
   const [total, setTotal] = useState<number>(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newAccount, setNewAccount] = useState({
-    accountHolderName: '',
-    bankName: '',
-    accountNumber: '',
-    accountType: '',
-    amount: '',
-    assetType: assetType
-  });
+ 
   const [loading, setLoading] = useState(false); // State to control the loading spinner
 
   useEffect(() => {
     const fetchBankAccounts = async () => {
       try {
-        const { accounts, total } = await getAssetByType(familyId, assetType);
+        const { accounts, total } = await getAssetByType(familyId, assetType,'amount');
         setBankAccounts(accounts);
         setTotal(total);
       } catch (error) {
@@ -49,47 +41,44 @@ const BankPage: React.FC = () => {
   }, [familyId]);
 
   const handleFormSubmit = async (newAccount: any) => {
-    setLoading(true); // Show loader before the async operation starts
+    setLoading(true); 
     try {
-      console.log("Bank Detail form", newAccount);
-      await addAsset(familyId, newAccount, assetType); // Save to database
-      setIsModalOpen(false);
+      await addAsset(familyId, newAccount, assetType); 
       refreshBankAccounts();
     } catch (error) {
       console.error('Error saving bank account:', error);
     } finally {
-      setLoading(false); // Hide loader after the async operation is completed
+      setLoading(false); 
     }
   };
 
   const refreshBankAccounts = async () => {
-    const assetType = 'BANK';
-    const { accounts, total } = await getAssetByType(familyId, assetType);
+    const { accounts, total } = await getAssetByType(familyId, assetType,'amount');
     setBankAccounts(accounts);
     setTotal(total);
   };
 
   const handleDelete = async (accountId: string) => {
-    setLoading(true); // Show loader before the async operation starts
+    setLoading(true); 
     try {
       await deleteAsset(familyId, accountId, assetType);
       refreshBankAccounts();
     } catch (error) {
       console.error('Error deleting bank account:', error);
     } finally {
-      setLoading(false); // Hide loader after the async operation is completed
+      setLoading(false); 
     }
   };
 
   const handleEdit = async (account: any) => {
-    setLoading(true); // Show loader before the async operation starts
+    setLoading(true); 
     try {
       await editAsset(familyId, account, assetType);
       refreshBankAccounts();
     } catch (error) {
       console.error('Error editing bank account:', error);
     } finally {
-      setLoading(false); // Hide loader after the async operation is completed
+      setLoading(false); 
     }
   };
 
@@ -126,6 +115,7 @@ const BankPage: React.FC = () => {
 
         <IonLoading isOpen={loading} message={'Please wait...'} /> {/* Loader for async operations */}
       </IonContent>
+
     </IonPage>
   );
 };

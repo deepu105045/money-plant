@@ -166,31 +166,31 @@
 
 
   
-    export const migrateData = async (familyId:string) => {
-        try {
-            const startYear = 2024;
-            const currentYear = new Date().getFullYear();
+    // export const migrateData = async (familyId:string) => {
+    //     try {
+    //         const startYear = 2024;
+    //         const currentYear = new Date().getFullYear();
     
-            for (let year = startYear; year <= currentYear; year++) {
-                for (let month = 7; month <= 8; month++) {
-                    const oldTransactionsRef = collection(db, `cashflow/${familyId}/${year}/${month}/transactions`);
-                    const q = query(oldTransactionsRef);
-                    const querySnapshot = await getDocs(q);
+    //         for (let year = startYear; year <= currentYear; year++) {
+    //             for (let month = 7; month <= 8; month++) {
+    //                 const oldTransactionsRef = collection(db, `cashflow/${familyId}/${year}/${month}/transactions`);
+    //                 const q = query(oldTransactionsRef);
+    //                 const querySnapshot = await getDocs(q);
     
-                    for (const doc of querySnapshot.docs) {
-                        const data = doc.data();
+    //                 for (const doc of querySnapshot.docs) {
+    //                     const data = doc.data();
                         
-                        // Move data to new structure
-                        const newTransactionsRef = collection(db, `cashflowNew/${familyId}/transactions`);
-                        await addDoc(newTransactionsRef, data);
+    //                     // Move data to new structure
+    //                     const newTransactionsRef = collection(db, `cashflowNew/${familyId}/transactions`);
+    //                     await addDoc(newTransactionsRef, data);
     
                         
-                    }
-                }
-            }
+    //                 }
+    //             }
+    //         }
     
-            console.log('Data migration completed successfully.');
-        } catch (error) {
-            console.error('Error during data migration:', error);
-        }
-    };
+    //         console.log('Data migration completed successfully.');
+    //     } catch (error) {
+    //         console.error('Error during data migration:', error);
+    //     }
+    // };

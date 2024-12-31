@@ -14,7 +14,7 @@ import ViewTransactions from './ViewTransactions';
 import { fetchMembersByHome } from '../../components/firebase/homeData';
 import { useSelector } from 'react-redux';
 import { selectUserInfo } from '../../state/userSlice';
-import { addTransactions, migrateData } from '../../components/firebase/finance';
+import { addTransactions } from '../../components/firebase/finance';
 import './HomeDashboard.css'; 
 import MonthYearLabel from './MonthYearLabel';
 
@@ -51,8 +51,6 @@ const HomeDashboard: React.FC = () => {
 
     const handleBack = () => {
         history.goBack();
-        console.log("Going to migrater data")
-        // migrateData('familyId')
     };
 
     const handleConfirm = async (formData: any) => {
@@ -81,9 +79,7 @@ const HomeDashboard: React.FC = () => {
                         Finance
                     </Typography>
                     <Box sx={{ flexGrow: 1 }} />
-                    {/* <Typography variant="h6" component="div" onClick={() => navigateTo(`/home/${id}/trend`)}>
-                        Go to Trends
-                    </Typography> */}
+                    
                 </Toolbar>
             </AppBar>
 

@@ -15,25 +15,24 @@ import {
   IonCol
 } from '@ionic/react';
 
-interface BankAccountListProps {
-  bankAccounts: any[];
+interface MutualFundListProps {
+  mutualFunds: any[];
   total: number;
   onDelete: (accountId: string) => void;
   onEdit: (account: any) => Promise<void>;
 }
 
-const BankAccountList: React.FC<BankAccountListProps> = ({ bankAccounts, total, onDelete, onEdit }) => {
+const MutualFundList: React.FC<MutualFundListProps> = ({ mutualFunds, total, onDelete, onEdit }) => {
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [accountToDelete, setAccountToDelete] = useState<string | null>(null);
   const [expandedAccordion, setExpandedAccordion] = useState<string | null>(null);
-  const amountRef = useRef<HTMLIonInputElement>(null); // Ref for capturing input element
+  const fundValueRef = useRef<HTMLIonInputElement>(null); // Ref for capturing input element
   const [isEditing, setIsEditing] = useState<string | null>(null);
   const [editingAccount, setEditingAccount] = useState<any>(null);
 
   useEffect(() => {
-    if (isEditing && amountRef.current) {
-      // Focus on the input when in editing mode
-      amountRef.current.setFocus();
+    if (isEditing && fundValueRef.current) {
+      fundValueRef.current.setFocus();
     }
   }, [isEditing]);
 
@@ -51,24 +50,22 @@ const BankAccountList: React.FC<BankAccountListProps> = ({ bankAccounts, total, 
   };
 
   const handleSaveEdit = async () => {
-    if (editingAccount && amountRef.current) {
-      // Get the value from the ref
-      const inputElement = await amountRef.current.getInputElement();
+    if (editingAccount && fundValueRef.current) {
+      const inputElement = await fundValueRef.current.getInputElement();
       const updatedAmount = inputElement.value;
 
-      // Update the account's amount
-      const updatedAccount = { ...editingAccount, amount: updatedAmount };
+      const updatedAccount = { ...editingAccount, currentValue: updatedAmount };
       console.log(updatedAccount);
 
       await onEdit(updatedAccount);
-      setIsEditing(null); // Reset editing state
+      setIsEditing(null); 
     }
   };
 
   return (
     <>
       <IonCard>
-        <IonCardContent style={{ backgroundColor: 'orange' }}>
+        <IonCardContent style={{ backgroundColor: 'light' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <IonCardTitle><strong>Total</strong></IonCardTitle>
             <IonCardTitle>₹{total.toLocaleString()}</IonCardTitle>
@@ -76,26 +73,24 @@ const BankAccountList: React.FC<BankAccountListProps> = ({ bankAccounts, total, 
         </IonCardContent>
       </IonCard>
 
-      {bankAccounts.map((account, index) => (
-        <IonCard key={account.id || index}>
+      {mutualFunds.map((account, index) => (
+        <IonCard key={account.id || index} >
           <IonCardContent>
-          <IonAccordionGroup
-              value={expandedAccordion} // Ensure this matches the expanded accordion
-              onIonChange={(e) => setExpandedAccordion(e.detail.value)} // Update on change
->              <IonAccordion value={index}>
+            <IonAccordionGroup value={expandedAccordion} onIonChange={(e) => setExpandedAccordion(e.detail.value)}>
+              <IonAccordion value={account.fundName}>
                 <IonItem
                   slot="header"
                   lines="none"
                   style={{ display: 'flex', justifyContent: 'space-between' }}
                 >
-                  <IonLabel>{account.accountHolderName}</IonLabel>
+                  <IonLabel>{account.fundName}</IonLabel>
                   {isEditing === account.id ? (
                     <IonInput
-                      ref={amountRef} // Attach ref here
-                      value={account.amount} // Use current amount as default
+                      ref={fundValueRef} // Attach ref here
+                      value={account.currentValue} // Use current amount as default
                     />
                   ) : (
-                    <IonLabel>₹{account.amount}</IonLabel>
+                    <IonLabel>₹{account.currentValue}</IonLabel>
                   )}
                 </IonItem>
 
@@ -111,29 +106,22 @@ const BankAccountList: React.FC<BankAccountListProps> = ({ bankAccounts, total, 
                     </IonRow>
                     <IonRow>
                       <IonCol size="6">
-                        <IonLabel><strong>Account Number:</strong></IonLabel>
+                        <IonLabel><strong>Fund Name:</strong></IonLabel>
                       </IonCol>
                       <IonCol size="6">
-                        <IonLabel>{account.accountNumber}</IonLabel>
-                      </IonCol>
-                    </IonRow>
-                    <IonRow>
-                      <IonCol size="6">
-                        <IonLabel><strong>Account Type:</strong></IonLabel>
-                      </IonCol>
-                      <IonCol size="6">
-                        <IonLabel>{account.accountType}</IonLabel>
+                        <IonLabel>{account.fundName}</IonLabel>
                       </IonCol>
                     </IonRow>
+                   
                     <IonRow>
                       <IonCol size="6">
-                        <IonLabel><strong>Amount:</strong></IonLabel>
+                        <IonLabel><strong>Current Value:</strong></IonLabel>
                       </IonCol>
                       <IonCol size="6">
                         {isEditing === account.id ? (
                           <IonInput
-                            ref={amountRef} // Attach ref here
-                            value={account.amount} // Use current amount as default
+                            ref={fundValueRef} // Attach ref here
+                            value={account.currentValue} // Use current amount as default
                             style={{
                               padding: '5px',
                               borderRadius: '5px',
@@ -143,7 +131,7 @@ const BankAccountList: React.FC<BankAccountListProps> = ({ bankAccounts, total, 
                             }}
                           />
                         ) : (
-                          `₹${account.amount}`
+                          `₹${account.currentValue}`
                         )}
                       </IonCol>
                     </IonRow>
@@ -204,4 +192,4 @@ const BankAccountList: React.FC<BankAccountListProps> = ({ bankAccounts, total, 
   );
 };
 
-export default BankAccountList;
+export default MutualFundList;

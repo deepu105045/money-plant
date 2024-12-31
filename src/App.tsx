@@ -46,9 +46,15 @@ import Registration from './pages/Register/Registeration';
 import { PersistGate } from 'redux-persist/integration/react';
 import HomeDashboard from './pages/Home/Home-dashboard';
 import Tasks from './pages/tasks/Task-dashboard';
-import TrendChart from './pages/Trend/TrendChart';
-import MyAssetsDashboard from './pages/my-assets/MyAssetsDashboard';
 import BankPage from './pages/my-assets/bank/BankPage';
+import MutualFundPage from './pages/my-assets/mutualfund/MutualFundPage';
+import ComingSoonPage from './pages/comingsoon/ComingSoonPage';
+import CreateEvent from './pages/events/CreateEvent';
+import AddEventTransaction from './pages/events/AddEventTransaction';
+import Bingo from './components/Bingo/Bingo';
+import StockPage from './pages/my-assets/stock/StockPage';
+import LandPage from './pages/my-assets/Land/LandPage';
+import NetWorthPage from './pages/my-assets/NetWorth/NetWorthPage';
 
 
 setupIonicReact();
@@ -61,16 +67,25 @@ const App: React.FC = () => (
         <IonReactRouter>
           <IonRouterOutlet>
             <Route exact path="/"><Redirect to="/login" /></Route>
+            <Route exact path="/bingo" component={Bingo}></Route>
             <Route exact path="/login"><Login /></Route>
 
             <Route path='/dashboard' component={Dashboard}></Route>
             <Route path="/register" component={Registration}></Route>
-            
+            <Route path="/create-event" component={CreateEvent}></Route>
+      
             <Route path= "/home/:id" component={HomeDashboard} />
             <Route path= "/home/:id/tasks" component={Tasks}/>
-            <Route path= "/home/:id/my-assets" component={MyAssetsDashboard}/>
 
+            <Route path="/event/:id" component={AddEventTransaction}/>
+            
             <Route path= "/home/:id/assets/bank" component={BankPage}/>
+            <Route path= "/home/:id/assets/mutualfund" component={MutualFundPage} />
+            <Route path= "/home/:id/assets/stock" component={StockPage} />
+            <Route path= "/home/:id/assets/land" component={StockPage} />
+            <Route path= "/home/:id/assets/networth" component={LandPage} />
+
+
 
           </IonRouterOutlet>
         </IonReactRouter>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
     AppBar, Toolbar, Typography, Box, IconButton, Button, TextField,
     Container, Grid, Radio, RadioGroup, FormControl, FormControlLabel, FormLabel,
@@ -8,7 +8,6 @@ import CloseIcon from '@mui/icons-material/Close';
 import { getCategoriesByFamilyId, addCategoryToConfig, getPopularCategories } from '../../components/firebase/configService';
 import { IonList, IonItem, IonLabel } from '@ionic/react';
 import { INCOME, SPENDING, INVESTMENT } from '../../components/utils/Constants';
-import { debounce } from 'lodash'; // You can install lodash for debouncing
 
 interface FinanceFormProps {
     type: string;
@@ -29,8 +28,10 @@ const TransactionForm: React.FC<FinanceFormProps> = ({ type, onCancel, onConfirm
     const [popularCategories, setPopularCategories] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
 
+    const debounceTimeout = useRef<NodeJS.Timeout | null>(null); // Reference for debounce timer
+
     useEffect(() => {
-        const today = new Date().toISOString().split('T')[0]; // Get current date in YYYY-MM-DD format
+        const today = new Date().toISOString().split('T')[0];
         setDate(today);
 
         const fetchCategories = async () => {
@@ -54,16 +55,42 @@ const TransactionForm: React.FC<FinanceFormProps> = ({ type, onCancel, onConfirm
         fetchCategories();
     }, [type]);
 
+    // Custom debounce function
+    const debounce = (func: (...args: any[]) => void, delay: number) => {
+        return (...args: any[]) => {
+            if (debounceTimeout.current) {
+                clearTimeout(debounceTimeout.current); // Clear previous timer
+            }
+            debounceTimeout.current = setTimeout(() => {
+                func(...args); // Call the function after delay
+            }, delay);
+        };
+    };
+
+    // Debounced function to handle category fetching
     const handleCategoryFetching = async (searchTerm: string) => {
-        try {
-          const fetchedCategories = await getCategoriesByFamilyId(familyId, searchTerm);
-          setSavedCategories(fetchedCategories);
-          setCategory(searchTerm);
-          setCategorySelected(true);
-        } catch (error) {
-          console.error("Error fetching categories:", error);
+        if (searchTerm.length >= 2) {  // Only fetch if 2 or more characters
+            try {
+                const fetchedCategories = await getCategoriesByFamilyId(familyId, searchTerm);
+                setSavedCategories(fetchedCategories);
+                setCategorySelected(true);
+            } catch (error) {
+                console.error("Error fetching categories:", error);
+            }
+        } else {
+            setSavedCategories([]);
+            setCategorySelected(false);
         }
-      };
+    };
+
+    // Debounced handler
+    const debouncedCategoryFetch = useCallback(debounce(handleCategoryFetching, 300), []);
+
+    const handleCategoryInput = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const searchTerm = event.target.value;
+        setCategory(searchTerm);  // Update the input value immediately
+        debouncedCategoryFetch(searchTerm);  // Trigger debounced fetch
+    };
 
     const handleSubmit = async () => {
         const formData = {
@@ -76,8 +103,7 @@ const TransactionForm: React.FC<FinanceFormProps> = ({ type, onCancel, onConfirm
         onConfirm(formData);
 
         if (savedCategories.length === 0) {
-            console.log("Add new category: " + category);
-            await addCategoryToConfig(familyId, category);
+            await addCategoryToConfig('cashflow', category);
         }
     };
 
@@ -85,8 +111,6 @@ const TransactionForm: React.FC<FinanceFormProps> = ({ type, onCancel, onConfirm
         setCategory(selectedCategory);
         setCategorySelected(false);
     };
-
-   
 
     if (loading) return <div>Loading...</div>;
 
@@ -120,7 +144,7 @@ const TransactionForm: React.FC<FinanceFormProps> = ({ type, onCancel, onConfirm
                             fullWidth
                             label="Category"
                             value={category}
-                            onChange={(event) => handleCategoryFetching(event.target.value)}
+                            onChange={handleCategoryInput}  // Use the debounced input handler
                         />
                         {categorySelected && (
                             <IonList>

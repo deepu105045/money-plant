@@ -44,33 +44,35 @@ export const deleteAsset = async (familyId: string, assetId: string, type: strin
 
 
 
-export const getAssetByType = async (familyId: string , type: string) => {
+export const getAssetByType = async (familyId: string, type: string, field: string) => {
   try {
     const ref = collection(db, `assets/${familyId}/${type}`);
     const myQuery = query(ref);
     const querySnapshot = await getDocs(myQuery);
-    let totalAmount = 0;
+
+    let totalFieldValue = 0; // Initialize total for the given field
     const accounts = querySnapshot.docs.map(doc => {
       const accountData = doc.data();
-      const amount = parseFloat(accountData.amount) || 0; 
-      totalAmount += amount;
+      const fieldValue = parseFloat(accountData[field]) || 0; // Dynamically use the field parameter
+      totalFieldValue += fieldValue;
       return {
         ...accountData,
         taskId: doc.id,
-              total: totalAmount
-
+        total: totalFieldValue
       };
     });
-    // Adding the total amount to the result
+
+    // Returning accounts and the total for the specified field
     return {
       accounts,
-      total: totalAmount
+      total: totalFieldValue
     };
   } catch (error) {
-    console.error('Error fetching  accounts:', error);
+    console.error(`Error fetching accounts for field "${field}":`, error);
     throw error;
   }
 };
+
 
 
 export const getTotalAssets = async (familyId: string, assetTypes: string[]) => {

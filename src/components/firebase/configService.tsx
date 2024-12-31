@@ -15,6 +15,24 @@ export const addCategoryToConfig = async (familyId: string, category: string): P
     }
   };
 
+  export const getAllCategories = async (): Promise<string[]> => {
+    try {
+      const configDocRef = doc(db, 'config', 'cashflow');
+      const docSnapshot = await getDoc(configDocRef);
+      
+      if (docSnapshot.exists()) {
+        const data = docSnapshot.data();
+        return data?.categories || []; // Return categories if available, or an empty array if not
+      } else {
+        console.log('No document found at /config/cashflow');
+        return [];
+      }
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      throw error;
+    }
+  };
+
 
 // export const getCategoriesByFamilyId = (familyId: string, searchString: string, callback: (categories: string[]) => void) => {
 //   try {
